@@ -42,34 +42,7 @@ require('packer').startup(function(use)
     use 'hrsh7th/cmp-cmdline'
     use 'hrsh7th/cmp-nvim-lsp'
     use 'saadparwaiz1/cmp_luasnip'
-    use {
-        'hrsh7th/nvim-cmp',
-        config = function() require('cmp').setup({
-            completion = {
-                completeopt = 'menu,menuone,noinsert',
-            },
-            snippet = {
-              expand = function(args)
-                require('luasnip').lsp_expand(args.body)
-              end,
-            },
-            mapping = {
-              ['<Tab>'] = function(fallback)
-                if cmp.visible() then
-                  cmp.select_next_item()
-                elseif luasnip.expand_or_jumpable() then
-                  luasnip.expand_or_jump()
-                else
-                  fallback()
-                end
-              end,
-            },
-            sources = {
-              { name = 'nvim_lsp' },
-              { name = 'luasnip' },
-            },
-        }) end
-    }
+    use 'hrsh7th/nvim-cmp'
 
     -- IDE
     use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
@@ -114,3 +87,25 @@ for _, lsp in ipairs(servers) do
     capabilities = capabilities,
   }
 end
+
+local cmp = require'cmp'
+
+cmp.setup({
+    completion = {
+        completeopt = 'menu,menuone,noinsert',
+    },
+    snippet = {
+      expand = function(args)
+        require('luasnip').lsp_expand(args.body)
+      end,
+    },
+    mapping = {
+      ['<Tab>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'i', 's' }),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    },
+    sources = {
+      { name = 'nvim_lsp' },
+      { name = 'luasnip' },
+      { name = 'buffer' },
+    },
+})
