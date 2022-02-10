@@ -14,6 +14,7 @@ map('n', '<Leader>b', ':b#<CR>', options)
 map('n', '<Leader>z', '1z=', options)
 map('n', '<Leader>n', ':lne<CR>', options)
 map('n', '<Leader>p', ':set invpaste<CR>', options)
+map('n', '<Leader>g', ':Telescope live_grep<CR>', options)
 
 -- uh, do I use these?
 map('n', '<Leader>f', 'gqis', options)

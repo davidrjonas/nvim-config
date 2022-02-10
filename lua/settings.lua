@@ -10,7 +10,7 @@ o.hlsearch = true
 o.incsearch = true
 o.laststatus = 2
 o.list = true
-o.listchars = 'trail: '
+o.listchars = 'tab:>~,trail: '
 o.smartcase = true
 o.swapfile = true
 
@@ -20,6 +20,7 @@ o.swapfile = true
 -- window-local options
 wo.number = false
 wo.wrap = false
+wo.foldenable = false
 
 -- buffer-local options
 bo.expandtab = true

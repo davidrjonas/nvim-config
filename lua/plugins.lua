@@ -48,17 +48,37 @@ require('packer').startup(function(use)
     use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
     use 'neovim/nvim-lspconfig'
     use 'nvim-lua/lsp_extensions.nvim'
-    use 'ojroques/nvim-lspfuzzy'
+    use { 'ojroques/nvim-lspfuzzy',
+      requires = {
+         {'junegunn/fzf'},
+         {'junegunn/fzf.vim'},
+      },
+    }
+    use 'glepnir/lspsaga.nvim'
     use {
       'nvim-telescope/telescope.nvim',
       requires = { 'nvim-lua/plenary.nvim' }
     }
-
-    use 'vimwiki/vimwiki'
-    -- let g:vimwiki_list = [{'syntax': 'markdown', 'ext': '.wiki'}]
+    use 'mhartington/formatter.nvim'
 
     -- Languages
+    -- https://github.com/neovim/nvim-lspconfig/wiki/Language-specific-plugins
+    use {'simrat39/rust-tools.nvim', config = function() require'rust-tools'.setup{} end }
+    use {
+      'Saecki/crates.nvim',
+      event = { "BufRead Cargo.toml" },
+      requires = { { 'nvim-lua/plenary.nvim' } },
+      config = function()
+          require('crates').setup()
+      end,
+    }
+    -- https://kushellig.de/neovim-php-ide/ has many good tips
+    use 'phpactor/phpactor'
+    use 'stephpy/vim-php-cs-fixer'
+    use 'alvan/vim-php-manual'
     --use 'ray-x/go.nvim'
+    use 'vimwiki/vimwiki'
+    -- let g:vimwiki_list = [{'syntax': 'markdown', 'ext': '.wiki'}]
 
     -- Maybes
     --use '9mm/vim-closer'
@@ -80,7 +100,7 @@ local nvim_lsp = require'lspconfig'
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 
-local servers = { 'clangd', 'rust_analyzer', 'pyright', 'intelephense' }
+local servers = { 'clangd', 'rust_analyzer', 'pyright', 'intelephense', 'phpactor' }
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup {
     -- on_attach = my_custom_on_attach,
@@ -100,12 +120,45 @@ cmp.setup({
       end,
     },
     mapping = {
+      ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
       ['<Tab>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'i', 's' }),
+      ['<S-Tab>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 's' }),
+      --['<Esc>'] = cmp.mapping.close(),
+      ['<Down>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+      ['<Up>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
       ['<CR>'] = cmp.mapping.confirm({ select = true }),
     },
     sources = {
       { name = 'nvim_lsp' },
       { name = 'luasnip' },
       { name = 'buffer' },
+      { name = "crates" },
     },
 })
+
+-- https://github.com/mhartington/formatter.nvim/blob/master/CONFIG.md
+require('formatter').setup({
+  filetype = {
+    rust = {
+      function()
+        return {
+          exe = "rustfmt",
+          args = {"--edition=2021", "--emit=stdout"},
+          stdin = true
+        }
+      end
+    },
+  }
+})
+
+vim.cmd([[
+  autocmd BufWritePost *.php silent! call PhpCsFixerFixFile()
+  let g:php_cs_fixer_config_file = '~/.php_cs.dist.php'
+]])
+
+vim.api.nvim_exec([[
+augroup FormatAutogroup
+  autocmd!
+  autocmd BufWritePost *.rs FormatWrite
+augroup END
+]], true)
