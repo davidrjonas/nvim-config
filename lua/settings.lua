@@ -13,6 +13,9 @@ o.list = true
 o.listchars = 'tab:>~,trail: '
 o.smartcase = true
 o.swapfile = true
+o.spell = true
+o.spelllang = "en_us"
+o.mouse = ''
 
 --o.ignorecase = true
 --o.scrolloff = 12
